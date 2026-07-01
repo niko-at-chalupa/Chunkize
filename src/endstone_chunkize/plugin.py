@@ -19,8 +19,8 @@ class ChunkizePlugin(Plugin):
                 "/chunkize (pause)<mode: ChunkizePause>",
                 "/chunkize (resume)<mode: ChunkizeResume>",
                 "/chunkize (cancel)<mode: ChunkizeCancel>",
-                "/chunkize (status)<mode: ChunkizeStatus>", 
-                "/chunkize (config)<mode: ChunkizeConfig>", 
+                "/chunkize (status)<mode: ChunkizeStatus>",
+                "/chunkize (config)<mode: ChunkizeConfig>",
             ],
             "permissions": ["chunkize.command"],
         }
@@ -55,7 +55,9 @@ class ChunkizePlugin(Plugin):
             task.releaseSlots()
         self.generationTask = None
 
-    def on_command(self, sender: CommandSender, command: Command, args: list[str]) -> bool:
+    def on_command(
+        self, sender: CommandSender, command: Command, args: list[str]
+    ) -> bool:
         if command.name != "chunkize":
             return False
         return handleCommand(self, sender, args)

@@ -5,7 +5,12 @@ from endstone.command import CommandSenderWrapper
 from endstone_chunkize.generation.plan import GenerationPlan
 from endstone_chunkize.generation.progress import RateTracker
 from endstone_chunkize.util.dimensions import normalizeDimensionName
-from endstone_chunkize.util.text import PREFIX, describeMessage, formatDuration, formatNumber
+from endstone_chunkize.util.text import (
+    PREFIX,
+    describeMessage,
+    formatDuration,
+    formatNumber,
+)
 
 FLUSH_TIMEOUT_SECONDS = 60
 FLUSH_READY_MARKERS = ("commands.save-all.success", "ready to be copied")
@@ -35,7 +40,9 @@ class GenerationTask:
         self.completedAhead = set()
         self.retryQueue = []
         self.retriedCells = set()
-        self.slots = [AreaSlot(f"chunkize{index}") for index in range(settings.maxActiveAreas)]
+        self.slots = [
+            AreaSlot(f"chunkize{index}") for index in range(settings.maxActiveAreas)
+        ]
         self.chunksDone = sum(cell.chunkCount for cell in plan.cells[:watermark])
         self.skippedChunks = skippedChunks
         self.rate = RateTracker()
@@ -72,7 +79,9 @@ class GenerationTask:
         self.completedAhead.clear()
         self.retryQueue.clear()
         self.retriedCells.clear()
-        self.chunksDone = sum(cell.chunkCount for cell in self.plan.cells[:self.watermark])
+        self.chunksDone = sum(
+            cell.chunkCount for cell in self.plan.cells[: self.watermark]
+        )
         self.activeTarget = self.settings.minActiveAreas
         self.areaCeiling = self.settings.maxActiveAreas
         self.startedAt = time.monotonic()
@@ -128,13 +137,20 @@ class GenerationTask:
             self.fillSlots(now)
         if self.task is None:
             return
-        if self.finished and not self.flushing and not any(slot.active for slot in self.slots):
+        if (
+            self.finished
+            and not self.flushing
+            and not any(slot.active for slot in self.slots)
+        ):
             self.finish()
             return
         if now - self.lastSave >= self.settings.saveIntervalSeconds:
             self.lastSave = now
             self.saveState(userPaused=False)
-        if self.settings.logIntervalSeconds > 0 and now - self.lastLog >= self.settings.logIntervalSeconds:
+        if (
+            self.settings.logIntervalSeconds > 0
+            and now - self.lastLog >= self.settings.logIntervalSeconds
+        ):
             self.lastLog = now
             self.logProgress()
 
@@ -187,7 +203,9 @@ class GenerationTask:
             slot.deadline = now + self.settings.cellTimeoutSeconds
             slot.settleStart = 0.0
             if not self.addArea(slot):
-                self.dispatch(f"execute in {self.dimension} run tickingarea remove {slot.name}")
+                self.dispatch(
+                    f"execute in {self.dimension} run tickingarea remove {slot.name}"
+                )
                 self.handleAreaFailure(activeCount)
                 return
             self.failStreak = 0
@@ -226,12 +244,16 @@ class GenerationTask:
             step = 2 if mspt > target * 1.3 else 1
             self.activeTarget -= step
         elif mspt < target * 0.8:
-            if self.activeTarget >= min(self.settings.maxActiveAreas, self.areaCeiling) \
-                    and self.areaCeiling < self.settings.maxActiveAreas:
+            if (
+                self.activeTarget >= min(self.settings.maxActiveAreas, self.areaCeiling)
+                and self.areaCeiling < self.settings.maxActiveAreas
+            ):
                 self.areaCeiling += 1
             self.activeTarget += 1
         upper = min(self.settings.maxActiveAreas, self.areaCeiling)
-        self.activeTarget = max(self.settings.minActiveAreas, min(self.activeTarget, upper))
+        self.activeTarget = max(
+            self.settings.minActiveAreas, min(self.activeTarget, upper)
+        )
 
     def serverMspt(self):
         try:
@@ -347,7 +369,9 @@ class GenerationTask:
 
     def clearStaleAreas(self):
         for index in range(10):
-            self.dispatch(f"execute in {self.dimension} run tickingarea remove chunkize{index}")
+            self.dispatch(
+                f"execute in {self.dimension} run tickingarea remove chunkize{index}"
+            )
 
     def commandSender(self):
         if self.quietSender is None:
@@ -362,32 +386,38 @@ class GenerationTask:
         self.commandErrors.clear()
         self.commandOutput.clear()
         try:
-            handled = self.plugin.server.dispatch_command(self.commandSender(), commandLine)
+            handled = self.plugin.server.dispatch_command(
+                self.commandSender(), commandLine
+            )
         except Exception:
             return False
         return handled and not self.commandErrors
 
     def saveState(self, userPaused):
-        self.plugin.progressStore.save({
-            "dimension": self.dimension,
-            "centerX": self.plan.centerX,
-            "centerZ": self.plan.centerZ,
-            "radius": self.plan.radius,
-            "shape": self.plan.shape,
-            "cellChunks": self.plan.cellChunks,
-            "watermark": self.watermark,
-            "skippedChunks": self.skippedChunks,
-            "totalChunks": self.plan.totalChunks,
-            "chunksDone": self.chunksDone,
-            "userPaused": userPaused,
-        })
+        self.plugin.progressStore.save(
+            {
+                "dimension": self.dimension,
+                "centerX": self.plan.centerX,
+                "centerZ": self.plan.centerZ,
+                "radius": self.plan.radius,
+                "shape": self.plan.shape,
+                "cellChunks": self.plan.cellChunks,
+                "watermark": self.watermark,
+                "skippedChunks": self.skippedChunks,
+                "totalChunks": self.plan.totalChunks,
+                "chunksDone": self.chunksDone,
+                "userPaused": userPaused,
+            }
+        )
 
     def finish(self):
         self.stopScheduler()
         self.plugin.progressStore.clear()
         elapsed = formatDuration(time.monotonic() - self.startedAt)
         total = formatNumber(self.chunksDone)
-        self.plugin.logger.info(f"Generation finished: {total} chunks processed in {elapsed}")
+        self.plugin.logger.info(
+            f"Generation finished: {total} chunks processed in {elapsed}"
+        )
         self.plugin.server.broadcast_message(
             f"{PREFIX}Finished pregenerating {total} chunks in {self.dimension}"
         )
@@ -433,7 +463,9 @@ class GenerationTask:
     def logProgress(self):
         done, total, percent = self.progressSnapshot()
         speed = self.rate.perSecond()
-        eta = formatDuration(max(total - done, 0) / speed) if speed >= 0.1 else "unknown"
+        eta = (
+            formatDuration(max(total - done, 0) / speed) if speed >= 0.1 else "unknown"
+        )
         self.plugin.logger.info(
             f"{self.dimension}: {percent:.1f}% ({formatNumber(done)}/{formatNumber(total)} chunks), "
             f"{speed:.1f} chunks/s, ETA {eta}"

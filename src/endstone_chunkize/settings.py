@@ -64,7 +64,7 @@ def writeMode(dataFolder, mode):
     lines = []
     if os.path.isfile(path):
         try:
-            with open(path, "r", encoding="utf-8") as file:
+            with open(path, encoding="utf-8") as file:
                 lines = file.readlines()
         except OSError:
             lines = []
@@ -72,7 +72,9 @@ def writeMode(dataFolder, mode):
     replaced = False
     for line in lines:
         stripped = line.lstrip()
-        if not replaced and (stripped.startswith("mode ") or stripped.startswith("mode=")):
+        if not replaced and (
+            stripped.startswith("mode ") or stripped.startswith("mode=")
+        ):
             out.append(f'mode = "{mode}"\n')
             replaced = True
         else:
@@ -112,19 +114,47 @@ class Settings:
             mode = DEFAULT_MODE
         self.mode = mode
         preset = MODE_PRESETS[mode]
-        self.cellChunks = clamp(int(generation.get("cellChunks", preset["cellChunks"])), 1, 10)
-        self.maxActiveAreas = clamp(int(generation.get("maxActiveAreas", preset["maxActiveAreas"])), 1, 10)
-        self.minActiveAreas = clamp(int(generation.get("minActiveAreas", 1)), 1, self.maxActiveAreas)
-        self.targetMspt = clamp(float(generation.get("targetMspt", preset["targetMspt"])), 10.0, 50.0)
-        self.checkIntervalTicks = clamp(int(generation.get("checkIntervalTicks", preset["checkIntervalTicks"])), 1, 200)
-        self.cellTimeoutSeconds = clamp(int(generation.get("cellTimeoutSeconds", 60)), 5, 3600)
-        self.settleSeconds = clamp(int(generation.get("settleSeconds", preset["settleSeconds"])), 0, 600)
-        self.settleMinSeconds = clamp(int(generation.get("settleMinSeconds", preset["settleMinSeconds"])), 0, self.settleSeconds)
+        self.cellChunks = clamp(
+            int(generation.get("cellChunks", preset["cellChunks"])), 1, 10
+        )
+        self.maxActiveAreas = clamp(
+            int(generation.get("maxActiveAreas", preset["maxActiveAreas"])), 1, 10
+        )
+        self.minActiveAreas = clamp(
+            int(generation.get("minActiveAreas", 1)), 1, self.maxActiveAreas
+        )
+        self.targetMspt = clamp(
+            float(generation.get("targetMspt", preset["targetMspt"])), 10.0, 50.0
+        )
+        self.checkIntervalTicks = clamp(
+            int(generation.get("checkIntervalTicks", preset["checkIntervalTicks"])),
+            1,
+            200,
+        )
+        self.cellTimeoutSeconds = clamp(
+            int(generation.get("cellTimeoutSeconds", 60)), 5, 3600
+        )
+        self.settleSeconds = clamp(
+            int(generation.get("settleSeconds", preset["settleSeconds"])), 0, 600
+        )
+        self.settleMinSeconds = clamp(
+            int(generation.get("settleMinSeconds", preset["settleMinSeconds"])),
+            0,
+            self.settleSeconds,
+        )
         self.maxRadius = clamp(int(generation.get("maxRadius", 50000)), 16, 1000000)
-        self.flushIntervalChunks = clamp(int(generation.get("flushIntervalChunks", preset["flushIntervalChunks"])), 0, 1000000)
+        self.flushIntervalChunks = clamp(
+            int(generation.get("flushIntervalChunks", preset["flushIntervalChunks"])),
+            0,
+            1000000,
+        )
         self.autoResume = bool(progress.get("autoResume", True))
-        self.logIntervalSeconds = clamp(int(progress.get("logIntervalSeconds", 30)), 0, 3600)
-        self.saveIntervalSeconds = clamp(int(progress.get("saveIntervalSeconds", 30)), 5, 3600)
+        self.logIntervalSeconds = clamp(
+            int(progress.get("logIntervalSeconds", 30)), 0, 3600
+        )
+        self.saveIntervalSeconds = clamp(
+            int(progress.get("saveIntervalSeconds", 30)), 5, 3600
+        )
 
 
 def applyMode(plugin, mode):

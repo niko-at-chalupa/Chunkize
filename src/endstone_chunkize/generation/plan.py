@@ -16,7 +16,7 @@ def ringCells(centerX, centerZ, ring):
 
 
 class CellPlan:
-    __slots__ = ("minChunkX", "minChunkZ", "maxChunkX", "maxChunkZ", "chunkCount")
+    __slots__ = ("chunkCount", "maxChunkX", "maxChunkZ", "minChunkX", "minChunkZ")
 
     def __init__(self, minChunkX, minChunkZ, maxChunkX, maxChunkZ):
         self.minChunkX = minChunkX
@@ -58,7 +58,9 @@ class GenerationPlan:
         )
         for ring in range(maxRing + 1):
             for cellX, cellZ in ringCells(centerCellX, centerCellZ, ring):
-                cell = self.clipCell(cellX, cellZ, minChunkX, maxChunkX, minChunkZ, maxChunkZ)
+                cell = self.clipCell(
+                    cellX, cellZ, minChunkX, maxChunkX, minChunkZ, maxChunkZ
+                )
                 if cell is not None:
                     self.cells.append(cell)
                     self.totalChunks += cell.chunkCount

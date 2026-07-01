@@ -56,10 +56,16 @@ def handleConfig(plugin, sender, params):
             sendError(sender, "Mode must be light, medium or intense")
             return True
         applyMode(plugin, mode)
-        sendInfo(sender, f"{ColorFormat.GREEN}Speed mode set to {mode} ({MODE_RATES[mode]}), applies to the next /chunkize start")
+        sendInfo(
+            sender,
+            f"{ColorFormat.GREEN}Speed mode set to {mode} ({MODE_RATES[mode]}), applies to the next /chunkize start",
+        )
         return True
     if not isinstance(sender, Player):
-        sendInfo(sender, f"Current speed mode: {plugin.settings.mode} ({MODE_RATES.get(plugin.settings.mode, '')})")
+        sendInfo(
+            sender,
+            f"Current speed mode: {plugin.settings.mode} ({MODE_RATES.get(plugin.settings.mode, '')})",
+        )
         sendInfo(sender, "Set it with /chunkize config <light|medium|intense>")
         return True
     showConfigForm(plugin, sender)
@@ -93,10 +99,15 @@ def makeModeChoice(plugin, mode):
 
 def handleStart(plugin, sender, params):
     if plugin.generationTask is not None:
-        sendError(sender, "A generation task already exists, run /chunkize cancel first")
+        sendError(
+            sender, "A generation task already exists, run /chunkize cancel first"
+        )
         return True
     if not params:
-        sendError(sender, "Usage: /chunkize start <radius> [dimension] [centerX] [centerZ] [shape]")
+        sendError(
+            sender,
+            "Usage: /chunkize start <radius> [dimension] [centerX] [centerZ] [shape]",
+        )
         return True
     try:
         radius = int(params[0])
@@ -107,7 +118,10 @@ def handleStart(plugin, sender, params):
         sendError(sender, "Radius must be at least 16 blocks")
         return True
     if radius > plugin.settings.maxRadius:
-        sendError(sender, f"Radius is capped at {formatNumber(plugin.settings.maxRadius)} blocks, raise maxRadius in config.toml to go further")
+        sendError(
+            sender,
+            f"Radius is capped at {formatNumber(plugin.settings.maxRadius)} blocks, raise maxRadius in config.toml to go further",
+        )
         return True
     dimension = None
     centerX = 0
@@ -120,7 +134,10 @@ def handleStart(plugin, sender, params):
     if len(params) > 1:
         dimension = normalizeDimensionName(params[1])
         if dimension is None:
-            sendError(sender, f"Unknown dimension {params[1]}, use overworld, nether or the_end")
+            sendError(
+                sender,
+                f"Unknown dimension {params[1]}, use overworld, nether or the_end",
+            )
             return True
     if dimension is None:
         dimension = "overworld"
@@ -147,8 +164,14 @@ def handleStart(plugin, sender, params):
     task = GenerationTask(plugin, plugin.settings, plan, dimension)
     plugin.generationTask = task
     task.start()
-    sendInfo(sender, f"{ColorFormat.GREEN}Started pregenerating a {shape} of radius {formatNumber(radius)} around {centerX}, {centerZ} in {dimension}")
-    sendInfo(sender, f"{formatNumber(plan.totalChunks)} chunks queued across {formatNumber(len(plan.cells))} batches in {plugin.settings.mode} mode, check /chunkize status anytime")
+    sendInfo(
+        sender,
+        f"{ColorFormat.GREEN}Started pregenerating a {shape} of radius {formatNumber(radius)} around {centerX}, {centerZ} in {dimension}",
+    )
+    sendInfo(
+        sender,
+        f"{formatNumber(plan.totalChunks)} chunks queued across {formatNumber(len(plan.cells))} batches in {plugin.settings.mode} mode, check /chunkize status anytime",
+    )
     plugin.logger.info(
         f"Generation started: {dimension}, radius {radius}, center {centerX} {centerZ}, "
         f"{plan.totalChunks} chunks"
@@ -212,7 +235,9 @@ def handleStatus(plugin, sender):
         total = state.get("totalChunks", 0)
         percent = done / total * 100.0 if total else 0.0
         sender.send_message(f"{PREFIX}{state['dimension']} (saved, not running)")
-        sender.send_message(f"Progress: {percent:.1f}% ({formatNumber(min(done, total))} / {formatNumber(total)} chunks)")
+        sender.send_message(
+            f"Progress: {percent:.1f}% ({formatNumber(min(done, total))} / {formatNumber(total)} chunks)"
+        )
         sender.send_message("Run /chunkize resume to continue")
         return True
     sendInfo(sender, "No generation task is running")

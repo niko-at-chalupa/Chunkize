@@ -12,7 +12,7 @@ class ProgressStore:
         if not os.path.isfile(self.path):
             return None
         try:
-            with open(self.path, "r", encoding="utf-8") as file:
+            with open(self.path, encoding="utf-8") as file:
                 state = json.load(file)
         except (OSError, ValueError):
             return None

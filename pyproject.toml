@@ -18,3 +18,20 @@ packages = ["src/endstone_chunkize"]
 
 [project.entry-points."endstone"]
 chunkize = "endstone_chunkize:ChunkizePlugin"
+
+[tool.ruff]
+lint.select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "N",      # pep8-naming (THIS IS KEY FOR YOUR ISSUE)
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C",      # flake8-comprehensions
+    "RUF",    # ruff-specific rules
+]
+
+line-length = 88
+
+[tool.ruff.lint.pep8-naming]

@@ -19,5 +19,7 @@ def normalizeDimensionName(raw):
                 name_attr = getattr(type_attr, "name", None)
         raw = name_attr if name_attr is not None else ""
 
-    cleaned = str(raw).lower().replace("minecraft:", "").replace("_", "").replace(" ", "")
+    cleaned = (
+        str(raw).lower().replace("minecraft:", "").replace("_", "").replace(" ", "")
+    )
     return DIMENSION_ALIASES.get(cleaned)
